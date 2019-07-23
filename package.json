@@ -1,0 +1,22 @@
+{
+  "name": "jscompiler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "compile": "tsc",
+    "lint": "tslint -p ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "12.6.8",
+    "prettier": "1.18.2",
+    "ts-node": "8.3.0",
+    "tslint": "5.18.0",
+    "tslint-config-prettier": "1.18.0",
+    "tslint-plugin-prettier": "2.0.1",
+    "typescript": "3.5.3"
+  }
+}
