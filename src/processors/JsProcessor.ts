@@ -1,7 +1,14 @@
-export function compile() {
+import { ProcessorMap } from "../operations";
+
+export const processors: ProcessorMap = {
+  compile,
+  execute
+};
+
+function compile() {
   console.log("compiling javascript source code.");
 }
 
-export function execute() {
+function execute() {
   console.log("executing javascript source code.");
 }
