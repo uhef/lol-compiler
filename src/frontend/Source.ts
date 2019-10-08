@@ -25,7 +25,7 @@ export class Source {
     this.input = i;
     // tslint:disable-next-line:no-empty
     this.readableCb = () => {};
-    this.input.on("readable", () => {
+    this.input.once("readable", () => {
       console.log("readable callback");
       this.state = InputState.Readable;
       this.readableCb();
@@ -89,7 +89,6 @@ export class Source {
     console.log("readNextChunk()");
     this.index = -1;
     const chunk = this.input.read();
-    this.buffer = chunk;
-    return chunk;
+    return chunk ? chunk : [null];
   }
 }

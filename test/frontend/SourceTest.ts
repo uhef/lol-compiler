@@ -38,22 +38,6 @@ test("File can be read using stream", async t => {
   }
 });
 
-// TODO: First test:
-//   - With input "A"
-//     - Source should return "A" when currentChar is called.
-//     - When nextChar is called Source should return EOF.
-//   - With input "A"
-//     - Source should return "A" when nextChar is called.
-//     - When nextChar is called Source should return EOF.
-//   - With input "A"
-//     - Source should return "A" when nextChar is called.
-//     - Source should return "A" when currentChar is called.
-//     - When nextChar is called Source should return EOF.
-//   - With input "A"
-//     - Source should return "A" when currentChar is called.
-//     - Source should return "A" when currentChar is called.
-//     - When nextChar is called Source should return EOF.
-// TODO: Test that nextChar works correctly over buffer boundaries.
 test("currentChar followed by nextChar consumes source", async t => {
   const inStream = new Readable({
     // tslint:disable-next-line:no-empty
@@ -101,6 +85,26 @@ test("currentChar, currentChar, nextChar consumes source", async t => {
   const source = new Source(inStream);
   t.is(await source.currentChar(), "A".charCodeAt(0));
   t.is(await source.currentChar(), "A".charCodeAt(0));
+  t.is(await source.nextChar(), null);
+});
+
+test("read over buffer boundary", async t => {
+  const data = ["A", "B", "C"];
+  let index = 0;
+  const inStream = new Readable({
+    read() {
+      if (index < data.length) {
+        this.push(data[index]);
+        index++;
+      } else {
+        this.push(null);
+      }
+    }
+  });
+  const source = new Source(inStream);
+  t.is(await source.nextChar(), "A".charCodeAt(0));
+  t.is(await source.nextChar(), "B".charCodeAt(0));
+  t.is(await source.nextChar(), "C".charCodeAt(0));
   t.is(await source.nextChar(), null);
 });
 
