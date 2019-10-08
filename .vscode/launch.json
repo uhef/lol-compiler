@@ -7,12 +7,15 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Ava",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "ava"
+      "name": "Run Ava test",
+      "program": "${workspaceFolder}/node_modules/ava/profile.js",
+      "args": [
+        "${file}",
+        "--serial"
       ],
-      "port": 9229
+      "skipFiles": [
+        "<node_internals>/**/*.js"
+      ]
     },
     {
       "type": "node",
