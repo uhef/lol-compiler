@@ -1,7 +1,6 @@
 import test from "ava";
-import { createReadStream } from "fs";
 import { Readable } from "stream";
-import { Source } from "../../src/frontend/Source";
+import { createSource } from "../../src/frontend/Source";
 
 test("currentChar followed by nextChar consumes source", async t => {
   const inStream = new Readable({
@@ -10,7 +9,7 @@ test("currentChar followed by nextChar consumes source", async t => {
   });
   inStream.push("A");
   inStream.push(null);
-  const source = new Source(inStream);
+  const source = await createSource(inStream);
   t.is(await source.currentChar(), "A".charCodeAt(0));
   t.is(await source.nextChar(), null);
 });
@@ -22,7 +21,7 @@ test("nextChar followed by nextChar consumes source", async t => {
   });
   inStream.push("A");
   inStream.push(null);
-  const source = new Source(inStream);
+  const source = await createSource(inStream);
   t.is(await source.nextChar(), "A".charCodeAt(0));
   t.is(await source.nextChar(), null);
 });
@@ -34,7 +33,7 @@ test("nextChar, currentChar, nextChar consumes source", async t => {
   });
   inStream.push("A");
   inStream.push(null);
-  const source = new Source(inStream);
+  const source = await createSource(inStream);
   t.is(await source.nextChar(), "A".charCodeAt(0));
   t.is(await source.currentChar(), "A".charCodeAt(0));
   t.is(await source.nextChar(), null);
@@ -47,7 +46,7 @@ test("currentChar, currentChar, nextChar consumes source", async t => {
   });
   inStream.push("A");
   inStream.push(null);
-  const source = new Source(inStream);
+  const source = await createSource(inStream);
   t.is(await source.currentChar(), "A".charCodeAt(0));
   t.is(await source.currentChar(), "A".charCodeAt(0));
   t.is(await source.nextChar(), null);
@@ -66,7 +65,7 @@ test("read over buffer boundary", async t => {
       }
     }
   });
-  const source = new Source(inStream);
+  const source = await createSource(inStream);
   t.is(await source.nextChar(), "A".charCodeAt(0));
   t.is(await source.nextChar(), "B".charCodeAt(0));
   t.is(await source.nextChar(), "C".charCodeAt(0));

@@ -13,23 +13,17 @@ enum InputState {
   Consumed
 }
 
-export class Source {
+class Source {
   private input: Readable;
-  private state: InputState = InputState.Initializing;
-  private buffer: Buffer | undefined;
+  private state: InputState = InputState.Readable;
+  private buffer: Buffer;
   private index: number = -1;
-  private readableCb: () => void;
 
-  constructor(i: Readable) {
+  constructor(i: Readable, b: Buffer) {
     this.input = i;
-    // tslint:disable-next-line:no-empty
-    this.readableCb = () => {};
-    this.input.once("readable", () => {
-      this.state = InputState.Readable;
-      this.readableCb();
-    });
+    this.buffer = b;
     this.input.on("end", () => {
-      this.markStreamConsumed();
+      this.state = InputState.Consumed;
     });
   }
 
@@ -52,12 +46,9 @@ export class Source {
 
   async nextChar(): Promise<number | null> {
     const bufferConsumed: boolean =
-      !!this.buffer && this.index + 1 >= this.buffer.length;
+      !!this.buffer && !this.buffer[this.index + 1];
     if (this.state === InputState.Consumed && bufferConsumed) {
       return null;
-    }
-    if (!this.buffer) {
-      this.buffer = await this.commenceReading();
     }
     if (bufferConsumed) {
       await this.readNextChunk();
@@ -67,22 +58,6 @@ export class Source {
       this.index++;
       return this.currentChar();
     }
-  }
-
-  async commenceReading(): Promise<Buffer> {
-    if (this.state === InputState.Readable) {
-      return this.input.read();
-    } else {
-      return new Promise((resolve, reject) => {
-        this.whenReadable(() => {
-          resolve(this.input.read());
-        });
-      });
-    }
-  }
-
-  whenReadable(cb: () => void) {
-    this.readableCb = cb;
   }
 
   async readNextChunk(): Promise<void> {
@@ -96,4 +71,11 @@ export class Source {
   }
 }
 
-// TODO: Wrap source into async createSource function to allow for reading in the first chunk.
+export async function createSource(input: Readable): Promise<Source> {
+  return new Promise(resolve => {
+    const buffer = input.read();
+    input.once("readable", () => {
+      resolve(new Source(input, buffer));
+    });
+  });
+}
