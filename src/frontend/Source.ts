@@ -6,7 +6,6 @@ import { Readable } from "stream";
 //   ## Verify that the readable stream `readableObjectMode` is `false`. The Source class is not able to handle object mode readable streams.
 
 // TODO: Should currentChar return EOF after nextChar has returned EOF?
-// TODO: Wrap source into async createSource function to allow for reading in the first chunk.
 
 enum InputState {
   Initializing,
@@ -30,8 +29,13 @@ export class Source {
       this.readableCb();
     });
     this.input.on("end", () => {
-      this.state = InputState.Consumed;
+      this.markStreamConsumed();
     });
+  }
+
+  markStreamConsumed() {
+    this.state = InputState.Consumed;
+    this.buffer = Buffer.from([]);
   }
 
   async currentChar(): Promise<number | null> {
@@ -41,7 +45,8 @@ export class Source {
       if (!this.buffer) {
         throw new Error("Internal error - Buffer not read.");
       }
-      return this.buffer[this.index];
+      const char = this.buffer[this.index];
+      return char ? char : null;
     }
   }
 
@@ -55,7 +60,7 @@ export class Source {
       this.buffer = await this.commenceReading();
     }
     if (bufferConsumed) {
-      this.buffer = await this.readNextChunk();
+      await this.readNextChunk();
       this.index++;
       return this.currentChar();
     } else {
@@ -80,9 +85,15 @@ export class Source {
     this.readableCb = cb;
   }
 
-  async readNextChunk(): Promise<Buffer> {
+  async readNextChunk(): Promise<void> {
     this.index = -1;
-    const chunk = this.input.read();
-    return chunk ? chunk : [null];
+    const chunk = await this.input.read();
+    if (chunk) {
+      this.buffer = chunk;
+    } else {
+      this.markStreamConsumed();
+    }
   }
 }
+
+// TODO: Wrap source into async createSource function to allow for reading in the first chunk.
