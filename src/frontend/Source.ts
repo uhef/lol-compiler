@@ -26,12 +26,10 @@ export class Source {
     // tslint:disable-next-line:no-empty
     this.readableCb = () => {};
     this.input.once("readable", () => {
-      console.log("readable callback");
       this.state = InputState.Readable;
       this.readableCb();
     });
     this.input.on("end", () => {
-      console.log("end callback");
       this.state = InputState.Consumed;
     });
   }
@@ -50,8 +48,6 @@ export class Source {
   async nextChar(): Promise<number | null> {
     const bufferConsumed: boolean =
       !!this.buffer && this.index + 1 >= this.buffer.length;
-    console.log("nextChar");
-
     if (this.state === InputState.Consumed && bufferConsumed) {
       return null;
     }
@@ -69,7 +65,6 @@ export class Source {
   }
 
   async commenceReading(): Promise<Buffer> {
-    console.log("commenceReading()");
     if (this.state === InputState.Readable) {
       return this.input.read();
     } else {
@@ -86,7 +81,6 @@ export class Source {
   }
 
   async readNextChunk(): Promise<Buffer> {
-    console.log("readNextChunk()");
     this.index = -1;
     const chunk = this.input.read();
     return chunk ? chunk : [null];
