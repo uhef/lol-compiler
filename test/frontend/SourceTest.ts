@@ -14,6 +14,19 @@ test("currentChar followed by nextChar consumes source", async t => {
   t.is(await source.nextChar(), null);
 });
 
+test("nextChar, nextChar, currentChar consumes source", async t => {
+  const inStream = new Readable({
+    // tslint:disable-next-line:no-empty
+    read() {}
+  });
+  inStream.push("A");
+  inStream.push(null);
+  const source = await createSource(inStream);
+  t.is(await source.nextChar(), "A".charCodeAt(0));
+  t.is(await source.nextChar(), null);
+  t.is(await source.currentChar(), null);
+});
+
 test("nextChar followed by nextChar consumes source", async t => {
   const inStream = new Readable({
     // tslint:disable-next-line:no-empty

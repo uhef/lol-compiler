@@ -5,8 +5,6 @@ import { Readable } from "stream";
 //   ## The readable stream with the source should be in paused (or pull) mode. Make sure that you don't add `data` event handler to keep the readable stream in paused mode.
 //   ## Verify that the readable stream `readableObjectMode` is `false`. The Source class is not able to handle object mode readable streams.
 
-// TODO: Should currentChar return EOF after nextChar has returned EOF?
-
 enum InputState {
   Initializing,
   Readable,
@@ -47,15 +45,14 @@ class Source {
   async nextChar(): Promise<number | null> {
     const bufferConsumed: boolean =
       !!this.buffer && !this.buffer[this.index + 1];
+    this.index++;
     if (this.state === InputState.Consumed && bufferConsumed) {
       return null;
     }
     if (bufferConsumed) {
       await this.readNextChunk();
-      this.index++;
       return this.currentChar();
     } else {
-      this.index++;
       return this.currentChar();
     }
   }
